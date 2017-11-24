@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+
+echo running...
+# echo Analytical Solution:
+# bin/Diffusion_Analytical
+
+bin/Diffusion_Numerical
