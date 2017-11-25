@@ -1,11 +1,15 @@
 #ifndef FTCS_H_
 #define FTCS_H_
 
+#define _USE_MATH_DEFINES
+
 #include <cmath>
 #include <vector>
+#include <fstream>
+#include <algorithm>
 
 
-// Forward time centered space 
+// Forward-time centered-space 
 class FTCS {
 
 private:
@@ -16,7 +20,6 @@ private:
 	double alpha;							// method is stable if alpha < 1/2
 	double d;								// Main diagonal elements value
 	std::vector<double> U;					// Vector of temperatures across the bar
-	// std::vector< std::vector<double> > A;	// A matrix defined in the report
 
 public:
 	FTCS(): alpha(0.499), h(0.1), K(1.0) 
@@ -45,11 +48,9 @@ public:
 	{
 		int time_steps = (1/tau) + 1;
 
-		printf("\n");
 		for (int i = 0; i < time_steps; i++)
 		{
 			U = U_next_();
-			//print_U_();
 		}
 	}
 
@@ -77,15 +78,10 @@ public:
 		U[0] = 0.0;
 		U[N-1] = 0.0;
 
-		printf("N = %d\n", N);
 		for (int i = 1; i < N-1; i++)
 		{
 			U[i] = U_x_0_(i * h);
-			// printf("i * h = %f\n", i * h);
 		}
-
-		printf("Initial U:\n");
-		print_U_();
 	}
 
 	double U_x_0_(double x)
@@ -120,18 +116,22 @@ public:
 		N = (1/h) + 1;
 
 		// Resize U according to N
-		// A.resize( N, std::vector<double>(N,0.0) );
 		U.resize(N);
-	}
-
-	void set_alpha()
-	{
-		alpha = K * tau / pow(h,2);
 	}
 
 	std::vector<double> get_U_()
 	{
 		return U;
+	}
+
+	void normalize_vector(std::vector<double> &src)
+	{
+		double max = *std::max_element(src.begin(), src.end());
+
+		for (int i = 0; i < N; i++)
+		{
+			src[i] = src[i] / max;
+		}
 	}	
 
 	void print_U_()
@@ -145,8 +145,65 @@ public:
 		printf("]\n");
 	}
 
+	bool export_U_vs_t_(std::vector<double> &x, std::vector<double> y, std::string fname)
+	{
+		if ( N != x.size() )
+		{
+			printf("Please resize %s to N elements and try again...\n", fname.c_str());
+			return false;
+		}
+
+		std::ofstream file("data/" + fname);	
+		normalize_vector(y);
+		if ( file.is_open() )
+	    {
+	       	for (int i = 0; i < N; i++)
+	       	{
+	        	file << x[i] << " " << y[i] << "\n";
+	        }
+	        return true;
+	    }
+	    else
+	    {
+	    	perror("ERROR Unable to export to CSV");
+	    }
+
+	    return false;
+	}
+
+	// Analytical Solution
+	std::vector<double> U_analytical(int steps, std::vector<double> &t)
+	{
+		std::vector<double> U_analytical(steps);
+
+		for (int i = 0; i < N; i++)
+		{
+			U_analytical[i] = U_x_t_(i*h, t);
+			// printf("i*h = %f\n", i*h);
+		}
+
+		return U_analytical;
+	}
+
+	double U_x_t_(double x, std::vector<double> &t)
+	{
+		double sum = 0.0;
+		double pi = M_PI; 
+		double exp_arg;
+
+		for (int n = 1; n < N; n++)
+		{
+			exp_arg = -pow(n*pi,2) * t[n];
+			// printf("exp_arg[%d] = %f\n", n, exp_arg);
+
+			sum += (1.0/pow(n,2)) * sin(n*pi/2) * sin(n*pi*x) * exp(exp_arg);
+			// printf("sum = %f\n", sum);
+		}
+
+		return sum * 8.0 / pow(pi,2);
+	}
+
 
 };
-
 
 #endif /* FTCS_H_ */

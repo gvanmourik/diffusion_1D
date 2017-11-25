@@ -6,9 +6,6 @@
 #include <iostream>
 
 
-const int SUDO_INF = 10000; 	//max int range
-
-
 double U_x_t_(double t);
 std::vector<double> U_x_t_values(int steps, std::vector<double> &t);
 std::vector<double> generate_t_(int steps, double t_min, double t_max);
@@ -40,7 +37,7 @@ double U_x_t_(double t)
 		exp_arg = pow(n*pi,2) * t;
 		// printf("exp_arg[%d] = %f\n", n, exp_arg);
 
-		sum += (1/pow(n,2)) * sin(n*pi/2) * exp(-exp_arg);
+		sum += (1/pow(n,2)) * sin(n*pi/2) * sin(n*pi*x) * exp(-exp_arg);
 		// printf("sum = %f\n", sum);
 	}
 
