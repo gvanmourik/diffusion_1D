@@ -13,20 +13,24 @@ int main(int argc, char const *argv[])
 	std::vector<double> U_numerical, U_analytical, t;
 
 	FTCS diffusion_stable(0.499, step_size, 1.0);
-	diffusion_stable.ftcs_explicit_method();
 	U_numerical = diffusion_stable.get_U_();
-	
 	spatial_steps = U_numerical.size();
 	t = generate_t_(spatial_steps, 0, 1);
+	diffusion_stable.export_U_vs_t_(t, U_numerical, "initial_distribution.data", false);
+	
+	diffusion_stable.ftcs_explicit_method();
+	U_numerical = diffusion_stable.get_U_();
+	t = generate_t_(spatial_steps, 0, 1);
 	U_analytical = diffusion_stable.U_analytical(spatial_steps, t);
-	diffusion_stable.export_U_vs_t_(t, U_numerical, "FTCS_stable.data");
-	diffusion_stable.export_U_vs_t_(t, U_analytical, "Analytical.data");
+	diffusion_stable.export_U_vs_t_(t, U_numerical, "FTCS_stable.data", true);
+	diffusion_stable.export_U_vs_t_(t, U_analytical, "Analytical.data", true);
 	
 	FTCS diffusion_unstable(0.502, step_size, 1.0);
 	diffusion_unstable.ftcs_explicit_method();
 	U_numerical = diffusion_unstable.get_U_();
+	// diffusion_unstable.fill_w_avg_vector_value(U_numerical);
 	t = generate_t_(U_numerical.size(), 0, 1);
-	diffusion_unstable.export_U_vs_t_(t, U_numerical, "FTCS_unstable.data");
+	diffusion_unstable.export_U_vs_t_(t, U_numerical, "FTCS_unstable.data", true);
 
 	Crank_Nicolson diffusion_CN(0.499, step_size, 1.0);
 	diffusion_CN.crank_nicolson_method();

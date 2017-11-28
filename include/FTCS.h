@@ -132,6 +132,25 @@ public:
 		{
 			src[i] = src[i] / max;
 		}
+	}
+
+	void fill_w_avg_vector_value(std::vector<double> &src)
+	{
+		normalize_vector(src);
+
+		// Find the average value of the vector
+		int elements = src.size();
+		double avg_value, sum = 0.0;
+		for (int i = 0; i < elements; i++)
+		{
+			sum += src[i];
+		}
+		avg_value = sum / (double)elements;
+
+		for (int i = 0; i < elements; i++)
+		{
+			src[i] = avg_value;
+		}
 	}	
 
 	void print_U_()
@@ -145,7 +164,7 @@ public:
 		printf("]\n");
 	}
 
-	bool export_U_vs_t_(std::vector<double> &x, std::vector<double> y, std::string fname)
+	bool export_U_vs_t_(std::vector<double> &x, std::vector<double> y, std::string fname, bool norm)
 	{
 		if ( N != x.size() )
 		{
@@ -153,8 +172,12 @@ public:
 			return false;
 		}
 
-		std::ofstream file("data/" + fname);	
-		normalize_vector(y);
+		if (norm)
+		{
+			normalize_vector(y);
+		}	
+
+		std::ofstream file("data/" + fname);
 		if ( file.is_open() )
 	    {
 	       	for (int i = 0; i < N; i++)
